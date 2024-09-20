@@ -1,6 +1,6 @@
 {
   "name": "graphql-sock",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "GraphQL Semantic Output Conversion Kit - converts a cutting edge SDL file that supports semantic nullability into a more traditional SDL file legacy tools can support.",
   "main": "dist/index.js",
   "bin": {
