@@ -8,7 +8,8 @@
     "semantic-to-strict": "dist/cli/to-strict.js"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "watch": "tsc --watch"
   },
   "repository": {
     "type": "git",
@@ -41,7 +42,7 @@
   "author": "Benjie Gillam <code@benjiegillam.com>",
   "license": "MIT",
   "dependencies": {
-    "graphql": "^16.9.0-canary.pr.4192.1813397076f44a55e5798478e7321db9877de97a"
+    "graphql": "16.9.0-canary.pr.4192.1813397076f44a55e5798478e7321db9877de97a"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.7",

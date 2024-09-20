@@ -14,10 +14,10 @@
   dependencies:
     undici-types "~6.19.2"
 
-graphql@^16.9.0-canary.pr.4192.1813397076f44a55e5798478e7321db9877de97a:
-  version "16.9.0"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.9.0.tgz#1c310e63f16a49ce1fbb230bd0a000e99f6f115f"
-  integrity sha512-GGTKBX4SD7Wdb8mqeDLni2oaRGYQWjWHGKPQ24ZMnUtKfcsVoiv4uX8+LJr1K6U5VW2Lu1BwJnj7uiori0YtRw==
+graphql@16.9.0-canary.pr.4192.1813397076f44a55e5798478e7321db9877de97a:
+  version "16.9.0-canary.pr.4192.1813397076f44a55e5798478e7321db9877de97a"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.9.0-canary.pr.4192.1813397076f44a55e5798478e7321db9877de97a.tgz#c5bbcdb258959b98352bcd9ea7f17790647113ae"
+  integrity sha512-P8UYoxSUI1KGr9O5f+AMA3TuLYxOcELoQebxGrnVAIUHM6HCpiLDT+CylrBWEBmvcc7S0xRFRiwvgwzChzLTyQ==
 
 prettier@^3.3.3:
   version "3.3.3"
