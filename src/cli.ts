@@ -11,6 +11,7 @@ import {
   GraphQLSemanticNonNull,
   GraphQLType,
   GraphQLUnionType,
+  Kind,
   printSchema,
   validateSchema,
 } from "graphql";
@@ -59,6 +60,7 @@ export async function main(toStrict = false) {
     types: config.types
       .filter((t) => !t.name.startsWith("__"))
       .map((t) => convertType(t)),
+    directives: config.directives.filter((d) => d.name !== "semanticNonNull"),
   });
 
   const newSdl = printSchema(derivedSchema);
@@ -72,13 +74,33 @@ function makeConvertType(toStrict: boolean) {
   function convertFields(fields: GraphQLFieldConfigMap<any, any>) {
     return () => {
       return Object.fromEntries(
-        Object.entries(fields).map(([fieldName, spec]) => [
-          fieldName,
-          {
-            ...spec,
-            type: convertType(spec.type),
-          },
-        ]),
+        Object.entries(fields).map(([fieldName, spec]) => {
+          const directive = spec.astNode?.directives?.find(
+            (d) => d.name.value === "semanticNonNull",
+          );
+          const levelsArg = directive?.arguments?.find(
+            (a) => a.name.value === "levels",
+          );
+          const levels =
+            levelsArg?.value?.kind === Kind.LIST
+              ? levelsArg.value.values
+                  .filter((v) => v.kind === Kind.INT)
+                  .map((v) => Number(v.value))
+              : [0];
+          return [
+            fieldName,
+            {
+              ...spec,
+              type: convertType(spec.type, directive ? levels : undefined),
+              astNode: spec.astNode && {
+                ...spec.astNode,
+                directives: spec.astNode?.directives?.filter(
+                  (d) => d.name.value !== "semanticNonNull",
+                ),
+              },
+            },
+          ];
+        }),
       ) as any;
     };
   }
@@ -102,14 +124,30 @@ function makeConvertType(toStrict: boolean) {
     return () => types.map((t) => convertType(t));
   }
 
-  function convertType(type: null | undefined): null | undefined;
-  function convertType(type: GraphQLObjectType): GraphQLObjectType;
+  function convertType(
+    type: null | undefined,
+    semanticNonNullLevels?: number[],
+  ): null | undefined;
+  function convertType(
+    type: GraphQLObjectType,
+    semanticNonNullLevels?: number[],
+  ): GraphQLObjectType;
   function convertType(
     type: Maybe<GraphQLObjectType>,
+    semanticNonNullLevels?: number[],
   ): Maybe<GraphQLObjectType>;
-  function convertType(type: GraphQLNamedType): GraphQLNamedType;
-  function convertType(type: GraphQLType): GraphQLType;
-  function convertType(type: GraphQLType | null | undefined) {
+  function convertType(
+    type: GraphQLNamedType,
+    semanticNonNullLevels?: number[],
+  ): GraphQLNamedType;
+  function convertType(
+    type: GraphQLType,
+    semanticNonNullLevels?: number[],
+  ): GraphQLType;
+  function convertType(
+    type: GraphQLType | null | undefined,
+    semanticNonNullLevels?: number[],
+  ) {
     if (!type) return type;
     if (type instanceof GraphQLSemanticNonNull) {
       const unwrapped = convertType(type.ofType);
@@ -122,7 +160,16 @@ function makeConvertType(toStrict: boolean) {
     } else if (type instanceof GraphQLNonNull) {
       return new GraphQLNonNull(convertType(type.ofType));
     } else if (type instanceof GraphQLList) {
-      return new GraphQLList(convertType(type.ofType));
+      const innerLevels = semanticNonNullLevels?.includes(1) ? [0] : undefined;
+      if (semanticNonNullLevels?.includes(0) && toStrict) {
+        return new GraphQLNonNull(
+          new GraphQLList(convertType(type.ofType, innerLevels)),
+        );
+      } else {
+        return new GraphQLList(convertType(type.ofType, innerLevels));
+      }
+    } else if (semanticNonNullLevels?.includes(0) && toStrict) {
+      return new GraphQLNonNull(convertType(type));
     }
     if (type.name.startsWith("__")) {
       return null;
