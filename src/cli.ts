@@ -7,6 +7,7 @@ import {
   GraphQLNamedType,
   GraphQLNonNull,
   GraphQLObjectType,
+  GraphQLOutputType,
   GraphQLSchema,
   GraphQLSemanticNonNull,
   GraphQLType,
@@ -87,11 +88,14 @@ function makeConvertType(toStrict: boolean) {
                   .filter((v) => v.kind === Kind.INT)
                   .map((v) => Number(v.value))
               : [0];
+          const type = directive
+            ? applySemanticNonNull(spec.type, levels)
+            : spec.type;
           return [
             fieldName,
             {
               ...spec,
-              type: convertType(spec.type, directive ? levels : undefined),
+              type: convertType(type),
               astNode: spec.astNode && {
                 ...spec.astNode,
                 directives: spec.astNode?.directives?.filter(
@@ -103,6 +107,48 @@ function makeConvertType(toStrict: boolean) {
         }),
       ) as any;
     };
+  }
+
+  /**
+   * Takes a GraphQL type along with levels at which to apply
+   * semantic-non-null, and returns a converted type with these levels applied.
+   */
+  function applySemanticNonNull(type: GraphQLOutputType, levels: number[]) {
+    function recurse(
+      type: GraphQLOutputType,
+      level: number,
+    ): GraphQLOutputType {
+      if (type instanceof GraphQLSemanticNonNull) {
+        // Strip semantic-non-null types; this should never happen but if someone
+        // uses both semantic-non-null and the `@semanticNonNull` directive, we
+        // want the directive to win (I guess?)
+        return recurse(type.ofType, level);
+      } else if (type instanceof GraphQLNonNull) {
+        const inner = recurse(type.ofType, level);
+        if (levels.includes(level)) {
+          // Semantic non-null from `inner` replaces our GrpahQLNonNull wrapper
+          return inner;
+        } else {
+          // Keep non-null wrapper; no semantic-non-null was added to `inner`
+          return new GraphQLNonNull(inner);
+        }
+      } else if (type instanceof GraphQLList) {
+        const inner = new GraphQLList(recurse(type.ofType, level + 1));
+        if (levels.includes(level)) {
+          return new GraphQLSemanticNonNull(inner);
+        } else {
+          return inner;
+        }
+      } else {
+        if (levels.includes(level)) {
+          return new GraphQLSemanticNonNull(type);
+        } else {
+          return type;
+        }
+      }
+    }
+
+    return recurse(type, 0);
   }
 
   function convertTypes(
@@ -124,30 +170,14 @@ function makeConvertType(toStrict: boolean) {
     return () => types.map((t) => convertType(t));
   }
 
-  function convertType(
-    type: null | undefined,
-    semanticNonNullLevels?: number[],
-  ): null | undefined;
-  function convertType(
-    type: GraphQLObjectType,
-    semanticNonNullLevels?: number[],
-  ): GraphQLObjectType;
+  function convertType(type: null | undefined): null | undefined;
+  function convertType(type: GraphQLObjectType): GraphQLObjectType;
   function convertType(
     type: Maybe<GraphQLObjectType>,
-    semanticNonNullLevels?: number[],
   ): Maybe<GraphQLObjectType>;
-  function convertType(
-    type: GraphQLNamedType,
-    semanticNonNullLevels?: number[],
-  ): GraphQLNamedType;
-  function convertType(
-    type: GraphQLType,
-    semanticNonNullLevels?: number[],
-  ): GraphQLType;
-  function convertType(
-    type: GraphQLType | null | undefined,
-    semanticNonNullLevels?: number[],
-  ) {
+  function convertType(type: GraphQLNamedType): GraphQLNamedType;
+  function convertType(type: GraphQLType): GraphQLType;
+  function convertType(type: GraphQLType | null | undefined) {
     if (!type) return type;
     if (type instanceof GraphQLSemanticNonNull) {
       const unwrapped = convertType(type.ofType);
@@ -160,16 +190,7 @@ function makeConvertType(toStrict: boolean) {
     } else if (type instanceof GraphQLNonNull) {
       return new GraphQLNonNull(convertType(type.ofType));
     } else if (type instanceof GraphQLList) {
-      const innerLevels = semanticNonNullLevels?.includes(1) ? [0] : undefined;
-      if (semanticNonNullLevels?.includes(0) && toStrict) {
-        return new GraphQLNonNull(
-          new GraphQLList(convertType(type.ofType, innerLevels)),
-        );
-      } else {
-        return new GraphQLList(convertType(type.ofType, innerLevels));
-      }
-    } else if (semanticNonNullLevels?.includes(0) && toStrict) {
-      return new GraphQLNonNull(convertType(type));
+      return new GraphQLList(convertType(type.ofType));
     }
     if (type.name.startsWith("__")) {
       return null;
