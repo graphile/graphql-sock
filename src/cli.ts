@@ -96,12 +96,14 @@ function makeConvertType(toStrict: boolean) {
             {
               ...spec,
               type: convertType(type),
-              astNode: spec.astNode && {
-                ...spec.astNode,
-                directives: spec.astNode?.directives?.filter(
-                  (d) => d.name.value !== "semanticNonNull",
-                ),
-              },
+              astNode: spec.astNode
+                ? {
+                    ...spec.astNode,
+                    directives: spec.astNode.directives?.filter(
+                      (d) => d.name.value !== "semanticNonNull",
+                    ),
+                  }
+                : undefined,
             },
           ];
         }),
