@@ -1,0 +1,41 @@
+directive @semanticNonNull(levels: [Int!]) on FIELD_DEFINITION
+
+type Query {
+  allThings(includingArchived: Boolean, first: Int!): ThingConnection
+    @semanticNonNull
+}
+
+type ThingConnection {
+  pageInfo: PageInfo!
+  nodes: [Thing] @semanticNonNull(levels: [0, 1])
+}
+
+type PageInfo {
+  startCursor: String @semanticNonNull(levels: [0])
+  endCursor: String @semanticNonNull
+  hasNextPage: Boolean @semanticNonNull
+  hasPreviousPage: Boolean @semanticNonNull
+}
+
+interface Thing {
+  id: ID!
+  name: String @semanticNonNull
+  description: String
+}
+
+type Book implements Thing {
+  id: ID!
+  # Test that this semantic-non-null doesn't cause issues
+  name: String* @semanticNonNull
+  description: String
+  # Test that this non-null gets stripped
+  pages: Int! @semanticNonNull
+}
+
+type Car implements Thing {
+  id: ID!
+  name: String @semanticNonNull
+  description: String
+  mileage: Float @semanticNonNull
+}
+

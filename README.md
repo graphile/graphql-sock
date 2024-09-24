@@ -18,8 +18,8 @@ generation and other such functionality.
 Which command you use will depend on your setup; if you're using `graphql-toe`
 then you'll want `semantic-to-strict` to really capitalize on the benefits of
 semantic nullability. If you just want to use a semantic nullability SDL with
-traditional tools that don't yet understand it, then `semantic-to-nullable`
-will just strip out the semantic-non-null types for you.
+traditional tools that don't yet understand it, then `semantic-to-nullable` will
+just strip out the semantic-non-null types for you.
 
 ## Installation
 
@@ -37,8 +37,8 @@ pnpm install --save graphql-sock
 
 If a value is "null only on error" then it can be null. This conversion strips
 all semantic-non-null type wrappers from the SDL, making a schema that appears
-as it traditionally would. This means that you won't reap any of the benefits
-of semantic nullability, but you can support existing tools.
+as it traditionally would. This means that you won't reap any of the benefits of
+semantic nullability, but you can support existing tools.
 
 ```
 semantic-to-nullable -i input.graphql -o output.graphql
@@ -52,8 +52,8 @@ will be thrown, then it will not be possible for you to read a `null` from a
 "null only on error" position. As such, this position becomes equivalent to a
 traditional non-null for you, so this conversion converts all semantic-non-null
 type wrappers into traditional non-null wrappers. Your type generators can
-therefore generate fewer nullables, and your frontend engineers have to do
-fewer null checks and are therefore happier.
+therefore generate fewer nullables, and your frontend engineers have to do fewer
+null checks and are therefore happier.
 
 ```
 semantic-to-strict -i input.graphql -o output.graphql

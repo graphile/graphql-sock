@@ -8,8 +8,12 @@
     "semantic-to-strict": "dist/cli/to-strict.js"
   },
   "scripts": {
+    "prepack": "tsc",
     "test": "node --test",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "lint": "yarn prettier:check && eslint --ext .js,.jsx,.ts,.tsx,.graphql .",
+    "lint:fix": "eslint --ext .js,.jsx,.ts,.tsx,.graphql . --fix; prettier --cache --ignore-path .eslintignore --write '**/*.{js,jsx,ts,tsx,graphql,md,json}'",
+    "prettier:check": "prettier --cache --ignore-path .eslintignore --check '**/*.{js,jsx,ts,tsx,graphql,md,json}'"
   },
   "repository": {
     "type": "git",
@@ -47,6 +51,13 @@
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.7",
     "@types/node": "^22.5.4",
+    "@typescript-eslint/eslint-plugin": "^6.8.0",
+    "@typescript-eslint/parser": "^6.8.0",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "eslint_d": "^13.0.0",
     "prettier": "^3.3.3",
     "typescript": "^5.6.2"
   },
