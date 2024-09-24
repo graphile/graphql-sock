@@ -1,3 +1,6 @@
+import { readFile, writeFile } from "node:fs/promises";
+import { parseArgs } from "node:util";
+
 import {
   buildSchema,
   GraphQLFieldConfig,
@@ -17,8 +20,6 @@ import {
   validateSchema,
 } from "graphql";
 import type { Maybe } from "graphql/jsutils/Maybe";
-import { readFile, writeFile } from "node:fs/promises";
-import { parseArgs } from "node:util";
 
 export async function main(toStrict = false) {
   const {
@@ -83,7 +84,7 @@ export function semanticToStrict(schema: GraphQLSchema) {
 function makeConvertType(toStrict: boolean) {
   const cache = new Map<string, GraphQLNamedType>();
 
-  function convertFields(fields: GraphQLFieldConfigMap<any, any>) {
+  function convertFields(fields: GraphQLFieldConfigMap<unknown, unknown>) {
     return () => {
       return Object.fromEntries(
         Object.entries(fields).map(([fieldName, inSpec]) => {
@@ -96,7 +97,7 @@ function makeConvertType(toStrict: boolean) {
             },
           ];
         }),
-      ) as any;
+      ) as GraphQLFieldConfigMap<unknown, unknown>;
     };
   }
 
@@ -115,7 +116,9 @@ function makeConvertType(toStrict: boolean) {
   function convertTypes(
     types: readonly GraphQLNamedType[] | null | undefined,
   ): undefined | (() => readonly GraphQLNamedType[]) {
-    if (!types) return undefined;
+    if (!types) {
+      return undefined;
+    }
     return () => types.map((t) => convertType(t));
   }
 
@@ -127,7 +130,9 @@ function makeConvertType(toStrict: boolean) {
   function convertType(type: GraphQLNamedType): GraphQLNamedType;
   function convertType(type: GraphQLType): GraphQLType;
   function convertType(type: GraphQLType | null | undefined) {
-    if (!type) return type;
+    if (!type) {
+      return type;
+    }
     if (type instanceof GraphQLSemanticNonNull) {
       const unwrapped = convertType(type.ofType);
       // Here's where we do our thing!
@@ -187,8 +192,8 @@ function makeConvertType(toStrict: boolean) {
  * @see {@url https://www.apollographql.com/docs/kotlin/advanced/nullability/#semanticnonnull}
  */
 export function applySemanticNonNullDirectiveToFieldConfig(
-  spec: GraphQLFieldConfig<any, any, any>,
-): GraphQLFieldConfig<any, any, any> {
+  spec: GraphQLFieldConfig<unknown, unknown, unknown>,
+): GraphQLFieldConfig<unknown, unknown, unknown> {
   const directive = spec.astNode?.directives?.find(
     (d) => d.name.value === "semanticNonNull",
   );

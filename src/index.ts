@@ -1,5 +1,5 @@
 export {
+  applySemanticNonNullDirectiveToFieldConfig,
   semanticToNullable,
   semanticToStrict,
-  applySemanticNonNullDirectiveToFieldConfig,
 } from "./cli.js";
