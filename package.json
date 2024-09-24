@@ -8,6 +8,7 @@
     "semantic-to-strict": "dist/cli/to-strict.js"
   },
   "scripts": {
+    "prepack": "tsc",
     "test": "node --test",
     "watch": "tsc --watch",
     "lint": "yarn prettier:check && eslint --ext .js,.jsx,.ts,.tsx,.graphql .",
