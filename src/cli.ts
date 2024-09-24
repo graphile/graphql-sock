@@ -1,7 +1,7 @@
 import {
   buildSchema,
+  GraphQLFieldConfig,
   GraphQLFieldConfigMap,
-  GraphQLFieldMap,
   GraphQLInterfaceType,
   GraphQLList,
   GraphQLNamedType,
@@ -17,7 +17,6 @@ import {
   validateSchema,
 } from "graphql";
 import type { Maybe } from "graphql/jsutils/Maybe";
-import { ObjMap } from "graphql/jsutils/ObjMap";
 import { readFile, writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 
@@ -75,82 +74,18 @@ function makeConvertType(toStrict: boolean) {
   function convertFields(fields: GraphQLFieldConfigMap<any, any>) {
     return () => {
       return Object.fromEntries(
-        Object.entries(fields).map(([fieldName, spec]) => {
-          const directive = spec.astNode?.directives?.find(
-            (d) => d.name.value === "semanticNonNull",
-          );
-          const levelsArg = directive?.arguments?.find(
-            (a) => a.name.value === "levels",
-          );
-          const levels =
-            levelsArg?.value?.kind === Kind.LIST
-              ? levelsArg.value.values
-                  .filter((v) => v.kind === Kind.INT)
-                  .map((v) => Number(v.value))
-              : [0];
-          const type = directive
-            ? applySemanticNonNull(spec.type, levels)
-            : spec.type;
+        Object.entries(fields).map(([fieldName, inSpec]) => {
+          const spec = applySemanticNonNullDirective(inSpec);
           return [
             fieldName,
             {
               ...spec,
-              type: convertType(type),
-              astNode: spec.astNode
-                ? {
-                    ...spec.astNode,
-                    directives: spec.astNode.directives?.filter(
-                      (d) => d.name.value !== "semanticNonNull",
-                    ),
-                  }
-                : undefined,
+              type: convertType(spec.type),
             },
           ];
         }),
       ) as any;
     };
-  }
-
-  /**
-   * Takes a GraphQL type along with levels at which to apply
-   * semantic-non-null, and returns a converted type with these levels applied.
-   */
-  function applySemanticNonNull(type: GraphQLOutputType, levels: number[]) {
-    function recurse(
-      type: GraphQLOutputType,
-      level: number,
-    ): GraphQLOutputType {
-      if (type instanceof GraphQLSemanticNonNull) {
-        // Strip semantic-non-null types; this should never happen but if someone
-        // uses both semantic-non-null and the `@semanticNonNull` directive, we
-        // want the directive to win (I guess?)
-        return recurse(type.ofType, level);
-      } else if (type instanceof GraphQLNonNull) {
-        const inner = recurse(type.ofType, level);
-        if (levels.includes(level)) {
-          // Semantic non-null from `inner` replaces our GrpahQLNonNull wrapper
-          return inner;
-        } else {
-          // Keep non-null wrapper; no semantic-non-null was added to `inner`
-          return new GraphQLNonNull(inner);
-        }
-      } else if (type instanceof GraphQLList) {
-        const inner = new GraphQLList(recurse(type.ofType, level + 1));
-        if (levels.includes(level)) {
-          return new GraphQLSemanticNonNull(inner);
-        } else {
-          return inner;
-        }
-      } else {
-        if (levels.includes(level)) {
-          return new GraphQLSemanticNonNull(type);
-        } else {
-          return type;
-        }
-      }
-    }
-
-    return recurse(type, 0);
   }
 
   function convertTypes(
@@ -230,4 +165,69 @@ function makeConvertType(toStrict: boolean) {
   }
 
   return convertType;
+}
+
+/**
+ * Takes a GraphQL type along with levels at which to apply
+ * semantic-non-null, and returns a converted type with these levels applied.
+ */
+function applySemanticNonNullDirective(
+  spec: GraphQLFieldConfig<any, any, any>,
+): GraphQLFieldConfig<any, any, any> {
+  const directive = spec.astNode?.directives?.find(
+    (d) => d.name.value === "semanticNonNull",
+  );
+  if (!directive) {
+    return spec;
+  }
+  const levelsArg = directive.arguments?.find((a) => a.name.value === "levels");
+  const levels =
+    levelsArg?.value?.kind === Kind.LIST
+      ? levelsArg.value.values
+          .filter((v) => v.kind === Kind.INT)
+          .map((v) => Number(v.value))
+      : [0];
+  function recurse(type: GraphQLOutputType, level: number): GraphQLOutputType {
+    if (type instanceof GraphQLSemanticNonNull) {
+      // Strip semantic-non-null types; this should never happen but if someone
+      // uses both semantic-non-null and the `@semanticNonNull` directive, we
+      // want the directive to win (I guess?)
+      return recurse(type.ofType, level);
+    } else if (type instanceof GraphQLNonNull) {
+      const inner = recurse(type.ofType, level);
+      if (levels.includes(level)) {
+        // Semantic non-null from `inner` replaces our GrpahQLNonNull wrapper
+        return inner;
+      } else {
+        // Keep non-null wrapper; no semantic-non-null was added to `inner`
+        return new GraphQLNonNull(inner);
+      }
+    } else if (type instanceof GraphQLList) {
+      const inner = new GraphQLList(recurse(type.ofType, level + 1));
+      if (levels.includes(level)) {
+        return new GraphQLSemanticNonNull(inner);
+      } else {
+        return inner;
+      }
+    } else {
+      if (levels.includes(level)) {
+        return new GraphQLSemanticNonNull(type);
+      } else {
+        return type;
+      }
+    }
+  }
+
+  return {
+    ...spec,
+    type: recurse(spec.type, 0),
+    astNode: spec.astNode
+      ? {
+          ...spec.astNode,
+          directives: spec.astNode.directives?.filter(
+            (d) => d.name.value !== "semanticNonNull",
+          ),
+        }
+      : undefined,
+  };
 }
