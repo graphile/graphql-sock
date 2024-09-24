@@ -1,0 +1,35 @@
+type Query {
+  allThings(includingArchived: Boolean, first: Int!): ThingConnection!
+}
+
+type ThingConnection {
+  pageInfo: PageInfo!
+  nodes: [Thing!]!
+}
+
+type PageInfo {
+  startCursor: String!
+  endCursor: String!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+interface Thing {
+  id: ID!
+  name: String!
+  description: String
+}
+
+type Book implements Thing {
+  id: ID!
+  name: String!
+  description: String
+  pages: Int!
+}
+
+type Car implements Thing {
+  id: ID!
+  name: String!
+  description: String
+  mileage: Float!
+}
