@@ -168,8 +168,11 @@ function makeConvertType(toStrict: boolean) {
 }
 
 /**
- * Takes a GraphQL type along with levels at which to apply
- * semantic-non-null, and returns a converted type with these levels applied.
+ * Takes a GraphQL field config and checks to see if the `@semanticNonNull`
+ * directive was applied; if so, converts to a field config using explicit
+ * GraphQLSemanticNonNull wrapper types instead.
+ *
+ * @see {@url https://www.apollographql.com/docs/kotlin/advanced/nullability/#semanticnonnull}
  */
 function applySemanticNonNullDirective(
   spec: GraphQLFieldConfig<any, any, any>,
