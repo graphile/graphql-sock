@@ -1,3 +1,5 @@
+directive @semanticNonNull(levels: [Int!]) on FIELD_DEFINITION
+
 type Query {
   allThings(includingArchived: Boolean, first: Int!): ThingConnection
     @semanticNonNull
