@@ -85,6 +85,8 @@ and the `*` syntax (for syntax support, you will need to be running a
 ### Input schema
 
 ```graphql
+directive @semanticNonNull(levels: [Int!]! = [0]) on FIELD_DEFINITION
+
 type Query {
   someList: [Int] @semanticNonNull(levels: [0, 1])
   someOtherList: [String*]*
