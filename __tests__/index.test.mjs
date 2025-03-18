@@ -1,17 +1,28 @@
 // @ts-check
 
-import { test } from "node:test";
 import * as assert from "node:assert";
-import { semanticToStrict, semanticToNullable } from "../dist/index.js";
-import { buildSchema, printSchema } from "graphql";
 import { readdir, readFile } from "node:fs/promises";
+import { test } from "node:test";
+
+import * as graphql from "graphql";
+
+import { semanticToNullable, semanticToStrict } from "../dist/index.js";
+
+const { buildSchema, printSchema } = graphql;
+
+const isSemanticNonNullType = /** @type {any} */ (graphql)
+  .isSemanticNonNullType;
 
 const TEST_DIR = import.meta.dirname;
 const files = await readdir(TEST_DIR);
+const skip = test.skip.bind(test);
 
 for (const file of files) {
   if (file.endsWith(".test.graphql") && !file.startsWith(".")) {
-    test(file.replace(/\.test\.graphql$/, ""), async () => {
+    const pureDirective = file === "schema-with-directive-only.test.graphql";
+    const maybeTest =
+      pureDirective || isSemanticNonNullType != null ? test : skip;
+    maybeTest(file.replace(/\.test\.graphql$/, ""), async () => {
       const sdl = await readFile(TEST_DIR + "/" + file, "utf8");
       const schema = buildSchema(sdl);
       await test("semantic-to-strict", async () => {
