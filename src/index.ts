@@ -23,7 +23,8 @@ import * as graphql from "graphql";
 type Maybe<T> = null | undefined | T;
 
 // If GraphQL doesn't have this helper function, then it doesn't natively support GraphQLSemanticNonNull
-const isSemanticNonNullType = graphql.isSemanticNonNullType ?? (() => false);
+const isSemanticNonNullType =
+  (graphql as any).isSemanticNonNullType ?? (() => false);
 
 function convertSchema(schema: GraphQLSchema, toStrict: boolean) {
   const config = schema.toConfig();
@@ -102,7 +103,9 @@ function makeConvertType(toStrict: boolean) {
       return type;
     }
     if (isSemanticNonNullType(type)) {
-      const unwrapped = convertType(type.ofType as GraphQLNullableType);
+      const unwrapped = convertType(
+        (type as any).ofType as GraphQLNullableType,
+      );
       // Here's where we do our thing!
       if (toStrict) {
         return new GraphQLNonNull(unwrapped);
@@ -180,16 +183,6 @@ export function convertFieldConfig(
     ),
   };
 
-  if (!toStrict) {
-    // If we're not converting to strict, we can simply strip this directive
-    return {
-      ...spec,
-      astNode: filteredAstNode,
-    };
-  }
-
-  // Otherwise, convert semantic non-null positions to strict non-null
-
   const levelsArg = directive.arguments?.find((a) => a.name.value === "levels");
   const levels =
     levelsArg?.value?.kind === Kind.LIST
@@ -202,25 +195,27 @@ export function convertFieldConfig(
       // Strip semantic-non-null types; this should never happen but if someone
       // uses both semantic-non-null and the `@semanticNonNull` directive, we
       // want the directive to win (I guess?)
-      return recurse(type.ofType, level);
+      return recurse(
+        (type as any).ofType as GraphQLNullableType & GraphQLOutputType,
+        level,
+      );
     } else if (isNonNullType(type)) {
       const inner = recurse(type.ofType, level);
-      if (levels.includes(level)) {
-        // Semantic non-null from `inner` replaces our GraphQLNonNull wrapper
+      if (isNonNullType(inner)) {
         return inner;
       } else {
-        // Keep non-null wrapper; no semantic-non-null was added to `inner`
+        // Carry the non-null through no matter what semantic says
         return new GraphQLNonNull(inner);
       }
     } else if (isListType(type)) {
       const inner = new GraphQLList(recurse(type.ofType, level + 1));
-      if (levels.includes(level)) {
+      if (toStrict && levels.includes(level)) {
         return new GraphQLNonNull(inner);
       } else {
         return inner;
       }
     } else {
-      if (levels.includes(level)) {
+      if (toStrict && levels.includes(level)) {
         return new GraphQLNonNull(type);
       } else {
         return type;
