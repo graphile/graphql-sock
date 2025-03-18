@@ -46,7 +46,7 @@
   "author": "Benjie Gillam <code@benjiegillam.com>",
   "license": "MIT",
   "dependencies": {
-    "graphql": "16.9.0-canary.pr.4192.1813397076f44a55e5798478e7321db9877de97a"
+    "graphql": "15.x | 16.x | 17.x"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.7",
@@ -58,6 +58,7 @@
     "eslint-plugin-import": "^2.28.1",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint_d": "^13.0.0",
+    "graphql-pr-4192": "npm:graphql@16.9.0-canary.pr.4192.1813397076f44a55e5798478e7321db9877de97a",
     "prettier": "^3.3.3",
     "typescript": "^5.6.2"
   },
