@@ -109,11 +109,11 @@ function makeConvertType(toStrict: boolean) {
       } else {
         return unwrapped;
       }
-    } else if (type instanceof GraphQLNonNull) {
+    } else if (isNonNullType(type)) {
       return new GraphQLNonNull(
         convertType(type.ofType as GraphQLNullableType),
       );
-    } else if (type instanceof GraphQLList) {
+    } else if (isListType(type)) {
       return new GraphQLList(convertType(type.ofType as GraphQLType));
     }
     if (type.name.startsWith("__")) {
@@ -123,21 +123,21 @@ function makeConvertType(toStrict: boolean) {
       return cache.get(type.name);
     }
     const newType = (() => {
-      if (type instanceof GraphQLObjectType) {
+      if (isObjectType(type)) {
         const config = type.toConfig();
         return new GraphQLObjectType({
           ...config,
           fields: convertFields(config.fields),
           interfaces: convertTypes(config.interfaces),
         });
-      } else if (type instanceof GraphQLInterfaceType) {
+      } else if (isInterfaceType(type)) {
         const config = type.toConfig();
         return new GraphQLInterfaceType({
           ...config,
           fields: convertFields(config.fields),
           interfaces: convertTypes(config.interfaces),
         });
-      } else if (type instanceof GraphQLUnionType) {
+      } else if (isUnionType(type)) {
         const config = type.toConfig();
         return new GraphQLUnionType({
           ...config,
@@ -203,7 +203,7 @@ export function convertFieldConfig(
       // uses both semantic-non-null and the `@semanticNonNull` directive, we
       // want the directive to win (I guess?)
       return recurse(type.ofType, level);
-    } else if (type instanceof GraphQLNonNull) {
+    } else if (isNonNullType(type)) {
       const inner = recurse(type.ofType, level);
       if (levels.includes(level)) {
         // Semantic non-null from `inner` replaces our GraphQLNonNull wrapper
@@ -212,7 +212,7 @@ export function convertFieldConfig(
         // Keep non-null wrapper; no semantic-non-null was added to `inner`
         return new GraphQLNonNull(inner);
       }
-    } else if (type instanceof GraphQLList) {
+    } else if (isListType(type)) {
       const inner = new GraphQLList(recurse(type.ofType, level + 1));
       if (levels.includes(level)) {
         return new GraphQLNonNull(inner);
