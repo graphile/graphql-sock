@@ -11,6 +11,11 @@ import {
   GraphQLSchema,
   GraphQLType,
   GraphQLUnionType,
+  isInterfaceType,
+  isListType,
+  isNonNullType,
+  isObjectType,
+  isUnionType,
   Kind,
 } from "graphql";
 import * as graphql from "graphql";
@@ -51,10 +56,7 @@ function makeConvertType(toStrict: boolean) {
     return () => {
       return Object.fromEntries(
         Object.entries(fields).map(([fieldName, inSpec]) => {
-          const spec = applySemanticNonNullDirectiveToFieldConfig(
-            inSpec,
-            toStrict,
-          );
+          const spec = convertFieldConfig(inSpec, toStrict);
           return [
             fieldName,
             {
@@ -155,11 +157,11 @@ function makeConvertType(toStrict: boolean) {
 /**
  * Takes a GraphQL field config and checks to see if the `@semanticNonNull`
  * directive was applied; if so, converts to a field config that adds
- * GraphQLNonNull wrapper types in the relevant places if toStrict is true.
+ * GraphQLNonNull wrapper types in the relevant places if `toStrict` is true.
  *
  * @see {@url https://www.apollographql.com/docs/kotlin/advanced/nullability/#semanticnonnull}
  */
-export function applySemanticNonNullDirectiveToFieldConfig(
+export function convertFieldConfig(
   spec: GraphQLFieldConfig<unknown, unknown, unknown>,
   toStrict: boolean,
 ): GraphQLFieldConfig<unknown, unknown, unknown> {
