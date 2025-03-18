@@ -47,6 +47,11 @@ For the directive, the two conversions work like this:
 | semantic-to-nullable | `[Int] @semanticNonNull(levels: [0,1])` | `[Int]`     |
 | semantic-to-strict   | `[Int] @semanticNonNull(levels: [0,1])` | `[Int!]!`   |
 
+> [!NOTE]
+>
+> An existing strictly non-nullable type (`Int!`) will remain unchanged whether
+> or not `@semanticNonNull` applies to that level.
+
 ### `GraphQLSemanticNonNull` wrapper type
 
 How the `GraphQLSemanticNonNull` type is represented syntactically in SDL is yet
