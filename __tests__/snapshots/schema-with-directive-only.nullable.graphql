@@ -24,7 +24,7 @@ type Book implements Thing {
   id: ID!
   name: String
   description: String
-  pages: Int
+  pages: Int!
 }
 
 type Car implements Thing {

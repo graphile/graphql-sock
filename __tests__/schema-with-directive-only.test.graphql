@@ -27,7 +27,7 @@ type Book implements Thing {
   id: ID!
   name: String @semanticNonNull
   description: String
-  # Test that this non-null gets stripped
+  # Test that this non-null is retained
   pages: Int! @semanticNonNull
 }
 
