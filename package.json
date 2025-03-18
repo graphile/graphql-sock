@@ -9,7 +9,7 @@
   },
   "scripts": {
     "prepack": "tsc && chmod +x dist/cli/*.js",
-    "test": "node --test",
+    "test": "node --test --experimental-test-module-mocks",
     "watch": "tsc --watch",
     "lint": "yarn prettier:check && eslint --ext .js,.jsx,.ts,.tsx,.graphql .",
     "lint:fix": "eslint --ext .js,.jsx,.ts,.tsx,.graphql . --fix; prettier --cache --ignore-path .eslintignore --write '**/*.{js,jsx,ts,tsx,graphql,md,json}'",
@@ -59,6 +59,9 @@
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint_d": "^13.0.0",
     "graphql-pr-4192": "npm:graphql@16.9.0-canary.pr.4192.1813397076f44a55e5798478e7321db9877de97a",
+    "graphql15": "npm:graphql@15.x",
+    "graphql16": "npm:graphql@16.x",
+    "graphql17": "npm:graphql@17.x",
     "prettier": "^3.3.3",
     "typescript": "^5.6.2"
   },
