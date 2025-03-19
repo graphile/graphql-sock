@@ -73,13 +73,18 @@ The above examples using asterisk syntax would be:
 
 ## Installation
 
-Pick the line that relates to your package manager:
+You must install both `graphql-sock` and `graphql`; pick the line that relates
+to your package manager:
 
 ```bash
-npm install --save graphql-sock
-yarn add graphql-sock
-pnpm install --save graphql-sock
+npm install --save graphql-sock graphql
+yarn add graphql-sock graphql
+pnpm install --save graphql-sock graphql
 ```
+
+> [!NOTE]
+>
+> To support the `*` syntax, install `graphql@canary-pr-4192`
 
 ## Usage
 
