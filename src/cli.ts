@@ -1,9 +1,9 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 
-import { buildSchema, printSchema,validateSchema } from "graphql";
+import { buildSchema, printSchema, validateSchema } from "graphql";
 
-import { semanticToNullable,semanticToStrict } from "./index.js";
+import { semanticToNullable, semanticToStrict } from "./index.js";
 
 export async function main(toStrict = false) {
   const {
