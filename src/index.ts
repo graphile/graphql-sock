@@ -23,7 +23,10 @@ import * as graphql from "graphql";
 type Maybe<T> = null | undefined | T;
 
 // If GraphQL doesn't have this helper function, then it doesn't natively support GraphQLSemanticNonNull
-const isSemanticNonNullType =
+const isSemanticNonNullType: (
+  t: unknown,
+) => t is { ofType: GraphQLNullableType } =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (graphql as any).isSemanticNonNullType ?? (() => false);
 
 function convertSchema(schema: GraphQLSchema, toStrict: boolean) {
@@ -103,9 +106,7 @@ function makeConvertType(toStrict: boolean) {
       return type;
     }
     if (isSemanticNonNullType(type)) {
-      const unwrapped = convertType(
-        (type as any).ofType as GraphQLNullableType,
-      );
+      const unwrapped = convertType(type.ofType);
       // Here's where we do our thing!
       if (toStrict) {
         return new GraphQLNonNull(unwrapped);
@@ -195,10 +196,7 @@ export function convertFieldConfig(
       // Strip semantic-non-null types; this should never happen but if someone
       // uses both semantic-non-null and the `@semanticNonNull` directive, we
       // want the directive to win (I guess?)
-      return recurse(
-        (type as any).ofType as GraphQLNullableType & GraphQLOutputType,
-        level,
-      );
+      return recurse(type.ofType, level);
     } else if (isNonNullType(type)) {
       const inner = recurse(type.ofType, level);
       if (isNonNullType(inner)) {
