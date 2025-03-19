@@ -918,10 +918,30 @@ graphemer@^1.4.0:
   resolved "https://registry.yarnpkg.com/graphemer/-/graphemer-1.4.0.tgz#fb2f1d55e0e3a1849aeffc90c4fa0dd53a0e66c6"
   integrity sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==
 
-graphql@16.9.0-canary.pr.4192.1813397076f44a55e5798478e7321db9877de97a:
+"graphql-pr-4192@npm:graphql@16.9.0-canary.pr.4192.1813397076f44a55e5798478e7321db9877de97a":
   version "16.9.0-canary.pr.4192.1813397076f44a55e5798478e7321db9877de97a"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.9.0-canary.pr.4192.1813397076f44a55e5798478e7321db9877de97a.tgz#c5bbcdb258959b98352bcd9ea7f17790647113ae"
   integrity sha512-P8UYoxSUI1KGr9O5f+AMA3TuLYxOcELoQebxGrnVAIUHM6HCpiLDT+CylrBWEBmvcc7S0xRFRiwvgwzChzLTyQ==
+
+"graphql15@npm:graphql@15.x":
+  version "15.10.1"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.10.1.tgz#e9ff3bb928749275477f748b14aa5c30dcad6f2f"
+  integrity sha512-BL/Xd/T9baO6NFzoMpiMD7YUZ62R6viR5tp/MULVEnbYJXZA//kRNW7J0j1w/wXArgL0sCxhDfK5dczSKn3+cg==
+
+"graphql16@npm:graphql@16.x":
+  version "16.10.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.10.0.tgz#24c01ae0af6b11ea87bf55694429198aaa8e220c"
+  integrity sha512-AjqGKbDGUFRKIRCP9tCKiIGHyriz2oHEbPIbEtcSLSs4YjReZOIPQQWek4+6hjw62H9QShXHyaGivGiYVLeYFQ==
+
+"graphql17@npm:graphql@17.x":
+  version "17.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-17.0.0-alpha.8.tgz#dba4a0cbe3efe8243666726f1b4ffd65f87d9b06"
+  integrity sha512-j9Jn56NCWVaLMt1hSNkMDoCuAisBwY3bxp/5tbrJuPtNtHg9dAf4NjKnlVDCksVP3jBVcipFaEXKWsdNxTlcyg==
+
+"graphql@15.x | 16.x | 17.x":
+  version "17.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-17.0.0-alpha.8.tgz#dba4a0cbe3efe8243666726f1b4ffd65f87d9b06"
+  integrity sha512-j9Jn56NCWVaLMt1hSNkMDoCuAisBwY3bxp/5tbrJuPtNtHg9dAf4NjKnlVDCksVP3jBVcipFaEXKWsdNxTlcyg==
 
 has-bigints@^1.0.1, has-bigints@^1.0.2:
   version "1.0.2"

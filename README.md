@@ -47,6 +47,11 @@ For the directive, the two conversions work like this:
 | semantic-to-nullable | `[Int] @semanticNonNull(levels: [0,1])` | `[Int]`     |
 | semantic-to-strict   | `[Int] @semanticNonNull(levels: [0,1])` | `[Int!]!`   |
 
+> [!NOTE]
+>
+> An existing strictly non-nullable type (`Int!`) will remain unchanged whether
+> or not `@semanticNonNull` applies to that level.
+
 ### `GraphQLSemanticNonNull` wrapper type
 
 How the `GraphQLSemanticNonNull` type is represented syntactically in SDL is yet
@@ -187,3 +192,20 @@ import { schema as sourceSchema } from "./my-schema";
 
 export const schema = semanticToStrict(sourceSchema);
 ```
+
+## Advanced usage
+
+If you just want to convert a single `GraphQLFieldConfig` you can use the
+`convertFieldConfig` method, passing the field config and `true` to convert
+semantic non-null positions to strict non-nulls, or `false` if you want to
+convert to nullable:
+
+```ts
+const strictFieldConfig = convertFieldConfig(fieldConfig, true);
+const nullableFieldConfig = convertFieldConfig(fieldConfig, false);
+```
+
+> [!NOTE]
+>
+> This method assumes that the fieldConfig has come from parsing an SDL string,
+> and thus has an `astNode` that includes a `@semanticNonNull` directive.

@@ -25,8 +25,7 @@ interface Thing {
 
 type Book implements Thing {
   id: ID!
-  # Test that this semantic-non-null doesn't cause issues
-  name: String* @semanticNonNull
+  name: String @semanticNonNull
   description: String
   # Test that this non-null is retained
   pages: Int! @semanticNonNull
@@ -38,4 +37,3 @@ type Car implements Thing {
   description: String
   mileage: Float @semanticNonNull
 }
-
