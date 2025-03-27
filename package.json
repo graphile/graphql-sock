@@ -46,7 +46,7 @@
   "author": "Benjie Gillam <code@benjiegillam.com>",
   "license": "MIT",
   "peerDependencies": {
-    "graphql": "15.x | 16.x | 17.x"
+    "graphql": "15.x || 16.x || 17.x"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.7",
